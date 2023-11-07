@@ -2,11 +2,11 @@
 /**
 * Clase Ahorcado. Juego del ahorcado
 
-* @author: Xurxo González Tenreiro
+* @author: Rodrigo Sambade Saá
 
-* @version: 1.0 31/10/2019
+* @version: 1.0 7/11/2023
 
-* @see <a href = "http://www.webferrol.com" /> https://www.webferrol.com </a>
+*
 
 */
 //export class Ahorcado{
