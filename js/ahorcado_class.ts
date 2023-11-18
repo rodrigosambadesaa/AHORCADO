@@ -66,7 +66,9 @@ class Ahorcado {
 			indices.push(i);
 			this.aciertos[i] = true;
 		}
-		if (!indices.length) this.contadorFallos++;
+		if (!indices.length) {
+			this.contadorFallos++;
+		}
 		return indices;
 	}
 

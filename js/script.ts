@@ -1,7 +1,7 @@
 "use strict";
 //import * as ahorcado_class from './ahorcado_class';
 //ajax Asynchronous JAvascript + XML
-let juego: Ahorcado = undefined; //objeto Ahoracado con que se incializa el juego
+let juego: Ahorcado = undefined; //objeto Ahorcado con que se incializa el juego
 let palabrasA: string[] = []; //almacenamos las palabras candidatas para adivinar
 let casilleroE: any = null; //elemento div donde se pondrán las casillas de las letras adivinadas
 const ELEMENTOS: string[] = ["cuerda", "cabeza", "tronco", "brazo-izquierdo", "brazo-derecho", "pie-izquierdo", "pie-derecho"];
