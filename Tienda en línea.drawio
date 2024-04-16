@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2024-04-16T08:11:06.827Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36" etag="8_S6v_VAC2xoYGFVpLlX" version="24.2.5" type="github">
+<mxfile host="app.diagrams.net" modified="2024-04-16T08:11:57.762Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36" etag="j26dyoCnmjOAzXgO_YeU" version="24.2.5" type="github">
   <diagram id="R2lEEEUBdFMjLlhIrx00" name="Page-1">
     <mxGraphModel dx="2284" dy="1884" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0" extFonts="Permanent Marker^https://fonts.googleapis.com/css?family=Permanent+Marker">
       <root>
@@ -17,19 +17,19 @@
           <mxGeometry x="-180" y="-70" width="90" height="60" as="geometry" />
         </mxCell>
         <mxCell id="lJdPWpP_AhthNzz1HLUO-2" value="nombre" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="-80" y="-130" width="90" height="40" as="geometry" />
+          <mxGeometry x="-150" y="-170" width="90" height="40" as="geometry" />
         </mxCell>
         <mxCell id="lJdPWpP_AhthNzz1HLUO-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=0.056;entryY=0.675;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="lJdPWpP_AhthNzz1HLUO-1" target="lJdPWpP_AhthNzz1HLUO-2">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="lJdPWpP_AhthNzz1HLUO-5" value="&lt;u&gt;id&lt;/u&gt;" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="-130" y="-110" width="30" height="20" as="geometry" />
+          <mxGeometry x="-190" y="-120" width="30" height="20" as="geometry" />
         </mxCell>
         <mxCell id="lJdPWpP_AhthNzz1HLUO-8" value="descripcion" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="-70" width="80" height="40" as="geometry" />
+          <mxGeometry x="-60" y="20" width="80" height="40" as="geometry" />
         </mxCell>
         <mxCell id="lJdPWpP_AhthNzz1HLUO-10" value="precio" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="-90" y="40" width="60" height="50" as="geometry" />
+          <mxGeometry x="-130" y="40" width="60" height="50" as="geometry" />
         </mxCell>
         <mxCell id="lJdPWpP_AhthNzz1HLUO-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="lJdPWpP_AhthNzz1HLUO-12" target="lJdPWpP_AhthNzz1HLUO-13">
           <mxGeometry relative="1" as="geometry" />
@@ -53,7 +53,7 @@
           <mxGeometry x="-180" y="240" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="lJdPWpP_AhthNzz1HLUO-30" value="&lt;u&gt;id&lt;/u&gt;" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="-40" y="200" width="30" height="30" as="geometry" />
+          <mxGeometry x="-80" y="170" width="30" height="30" as="geometry" />
         </mxCell>
         <mxCell id="lJdPWpP_AhthNzz1HLUO-32" value="" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERoneToMany;rounded=0;exitX=0.342;exitY=-0.017;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="lJdPWpP_AhthNzz1HLUO-29" target="lJdPWpP_AhthNzz1HLUO-1">
           <mxGeometry width="100" height="100" relative="1" as="geometry">
