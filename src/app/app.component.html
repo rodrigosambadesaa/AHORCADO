@@ -10,7 +10,7 @@
 
         <div class="configuracion">
             <label for="dificultad">Longitud de la próxima palabra</label>
-            <select id="dificultad" [(ngModel)]="dificultad">
+            <select id="dificultad" [(ngModel)]="dificultad" [disabled]="cargando">
                 <option *ngFor="let opcion of opcionesDificultad" [ngValue]="opcion">{{ dificultades[opcion].etiqueta }}</option>
             </select>
         </div>
@@ -18,7 +18,7 @@
 
         <div class="estado-fila">
             <div class="estado-pill" [class.ok]="juegoGanado" [class.bad]="juegoPerdido">
-                {{ juegoGanado ? 'Ganaste' : juegoPerdido ? 'Perdiste' : 'En juego' }}
+                {{ cargando ? 'Cargando' : juegoGanado ? 'Ganaste' : juegoPerdido ? 'Perdiste' : 'En juego' }}
             </div>
             <div class="estado-pill">Fallos: {{ fallos }}/{{ maxFallos }}</div>
             <div class="estado-pill">Progreso: {{ progreso }}%</div>
@@ -38,23 +38,25 @@
             <div class="pie-derecho" *ngIf="parteVisible(6)"></div>
         </section>
 
-        <section class="palabra" [attr.aria-label]="'Palabra: ' + palabraOculta.join(' ')">
+        <section class="palabra" [attr.aria-busy]="cargando" [attr.aria-label]="'Palabra: ' + palabraOculta.join(' ')">
             <span *ngFor="let letra of palabraOculta">{{ letra }}</span>
         </section>
 
         <form class="controles" (ngSubmit)="probarIntento()">
             <label for="intento">Tu letra</label>
             <input id="intento" name="intento" [(ngModel)]="intento" maxlength="2" autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="mensaje"
-                [disabled]="juegoTerminado" />
-            <button type="submit" [disabled]="juegoTerminado">Probar</button>
-            <button type="button" class="secundario" (click)="nuevaPartida()">Nueva partida</button>
+                [disabled]="cargando || !palabraOriginal || juegoTerminado" />
+            <button type="submit" [disabled]="cargando || !palabraOriginal || juegoTerminado">Probar</button>
+            <button type="button" class="secundario" [disabled]="cargando" (click)="nuevaPartida()">Nueva partida</button>
         </form>
 
         <p class="mensaje" id="mensaje" role="status" aria-live="polite" aria-atomic="true">{{ mensaje }}</p>
 
+        <p *ngIf="diccionarioReducido">Diccionario reducido: no se pudo descargar el completo. Puedes seguir jugando o recargar la página para reintentarlo.</p>
+
         <section class="teclado" aria-label="teclado en pantalla">
             <button type="button" *ngFor="let letra of letrasTeclado" (click)="probarDesdeTeclado(letra)"
-                [disabled]="letraUsada(letra) || juegoTerminado"
+                [disabled]="cargando || !palabraOriginal || letraUsada(letra) || juegoTerminado"
                 [class.acierto]="letrasAdivinadas.has(letra.toLowerCase())"
                 [attr.aria-label]="letra + (letrasAdivinadas.has(letra.toLowerCase()) ? ', acertada' : letrasFalladas.has(letra.toLowerCase()) ? ', fallada' : '')"
                 [class.error]="letrasFalladas.has(letra.toLowerCase())">

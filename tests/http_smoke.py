@@ -1,7 +1,8 @@
 """Check production routing, caching and security headers."""
+import gzip
 import os
 import re
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 
 base = os.environ.get("BASE_URL", "http://127.0.0.1:18081")
@@ -30,3 +31,10 @@ for path, expected in [("/missing.js", 404), ("/.git/config", 403)]:
         raise AssertionError(f"{path} unexpectedly served")
 with urlopen(base + "/healthz") as response:
     assert response.read().strip() == b"ok"
+
+scripts = re.findall(r'src="([^"]+\.js)"', html)
+assert scripts, "No JavaScript entry points in index"
+with urlopen(Request(base + "/" + scripts[0].lstrip("/"), headers={"Accept-Encoding": "gzip"})) as response:
+    assert response.headers["Content-Encoding"] == "gzip"
+    assert "Accept-Encoding" in response.headers["Vary"]
+    assert len(gzip.decompress(response.read())) > 1024

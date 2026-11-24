@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import spanishWords from 'an-array-of-spanish-words';
+import { cargarDiccionario, palabrasRespaldo } from './dictionary';
 import { normalizarLetra } from './game-utils';
 import { Dificultad, Estadisticas, claveEstadisticas, dificultades, opcionesDificultad, elegirPalabra, estadisticasVacias, leerEstadisticas, registrarResultado } from './game-settings';
 
@@ -12,7 +12,7 @@ import { Dificultad, Estadisticas, claveEstadisticas, dificultades, opcionesDifi
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   readonly maxFallos = 7;
   readonly letrasTeclado = [
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
@@ -24,6 +24,9 @@ export class AppComponent {
   dificultad: Dificultad = 'clasico';
   dificultadActual: Dificultad = 'clasico';
   estadisticas: Estadisticas = this.cargarEstadisticas();
+  cargando = false;
+  diccionarioReducido = false;
+  private diccionario?: readonly string[];
   intento = '';
   mensaje = 'Pulsa nueva partida para empezar.';
   palabraOriginal = '';
@@ -31,8 +34,8 @@ export class AppComponent {
   letrasAdivinadas = new Set<string>();
   letrasFalladas = new Set<string>();
 
-  constructor() {
-    this.nuevaPartida();
+  ngOnInit(): void {
+    void this.nuevaPartida();
   }
 
   get palabraOculta(): string[] {
@@ -66,9 +69,16 @@ export class AppComponent {
     return this.juegoGanado || this.juegoPerdido;
   }
 
-  nuevaPartida(): void {
+  async nuevaPartida(): Promise<void> {
+    if (this.cargando) return;
+    this.cargando = true;
+    this.mensaje = 'Preparando la palabra…';
     this.dificultadActual = this.dificultad;
-    this.palabraOriginal = this.obtenerPalabraValida();
+    try {
+      this.palabraOriginal = await this.obtenerPalabraValida();
+    } finally {
+      this.cargando = false;
+    }
     this.palabraNormalizada = [...this.palabraOriginal].map((letra) => normalizarLetra(letra));
     this.letrasAdivinadas.clear();
     this.letrasFalladas.clear();
@@ -80,7 +90,7 @@ export class AppComponent {
     const letra = normalizarLetra(this.intento);
     this.intento = '';
 
-    if (this.juegoTerminado) {
+    if (this.cargando || !this.palabraOriginal || this.juegoTerminado) {
       return;
     }
 
@@ -153,7 +163,19 @@ export class AppComponent {
     } catch { /* The game remains playable without browser storage. */ }
   }
 
-  private obtenerPalabraValida(): string {
-    return elegirPalabra(spanishWords, this.dificultadActual);
+  private cargarDiccionario(): Promise<readonly string[]> {
+    return cargarDiccionario();
+  }
+
+  private async obtenerPalabraValida(): Promise<string> {
+    if (!this.diccionario) {
+      try {
+        this.diccionario = await this.cargarDiccionario();
+      } catch {
+        // A failed download must not make the game unusable.
+      }
+    }
+    this.diccionarioReducido = !this.diccionario;
+    return elegirPalabra(this.diccionario ?? palabrasRespaldo, this.dificultadActual);
   }
 }

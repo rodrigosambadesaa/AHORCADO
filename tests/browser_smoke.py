@@ -12,6 +12,8 @@ with sync_playwright() as playwright:
         page.on("console", lambda message: errors.append(message.text) if message.type == "error" else None)
         page.goto(url, wait_until="networkidle")
         expect(page.get_by_role("heading", name="Ahorcado en español")).to_be_visible()
+        expect(page.get_by_role("status")).to_contain_text("Juego iniciado", timeout=30000)
+        expect(page.get_by_text("Diccionario reducido:", exact=False)).to_have_count(0)
         keys = page.locator(".teclado button")
         expect(keys).to_have_count(27)
         expect(page.locator(".estado-fila")).to_contain_text("Fallos: 0/7")
@@ -35,6 +37,7 @@ with sync_playwright() as playwright:
         assert sum(int(page.locator('[data-stat="' + stat + '"]').inner_text()) for stat in ("ganadas", "perdidas")) == 1
         page.locator("#dificultad").select_option(label="Palabras largas (11–14)")
         page.get_by_role("button", name="Nueva partida").click()
+        expect(page.get_by_role("status")).to_contain_text("Juego iniciado")
         assert 11 <= page.locator(".palabra span").count() <= 14
         page.get_by_role("button", name="Reiniciar estadísticas").click()
         expect(page.locator('[data-stat="ganadas"]')).to_have_text("0")
