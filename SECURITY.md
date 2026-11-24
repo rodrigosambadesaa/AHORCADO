@@ -14,3 +14,5 @@ Utiliza la opción privada de reporte de vulnerabilidades de GitHub si está hab
 - La auditoría es informativa durante la migración de Angular 17; una ejecución verde no implica ausencia de vulnerabilidades. Revisar el informe antes de publicar.
 - Node 20 y Angular 17 están fuera de soporte. Priorizar su migración antes de desplegar en producción.
 - Revisar las actualizaciones y los checks de CI antes de fusionar; no ejecutar código no confiable con secretos o permisos de escritura.
+
+- CodeQL analiza JS/TS y Python; Grype analiza ambas arquitecturas y conserva informes. La publicación por etiqueta exige superar las puertas de seguridad y CI, sin publicar desde PR.

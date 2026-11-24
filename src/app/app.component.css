@@ -357,3 +357,6 @@ button:focus-visible, input:focus-visible { outline: 3px solid #28475f; outline-
     .palabra span { border-color: #a6c9e8; }
     button:focus-visible, input:focus-visible, .configuracion select:focus-visible { outline-color: #b6d9f4; }
 }
+
+.teclado button { min-height: 44px; }
+.falladas { opacity: 1; }
