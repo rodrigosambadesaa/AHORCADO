@@ -5,7 +5,7 @@ Incluye diccionario español, teclado virtual, siete fallos máximos y reinicio 
 Las vocales acentuadas equivalen a su vocal base; N y Ñ se distinguen. Al perder se muestra la solución.
 
 Puedes elegir palabras cortas (4–6), medias (7–10), largas (11–14) o el modo clásico. La elección se aplica al comenzar una nueva partida. La longitud no garantiza una dificultad lingüística concreta.
-Se conservan victorias, derrotas y rachas en localStorage, sin servidores ni cuentas; puedes borrar las estadísticas desde el juego. Las partidas abandonadas no cuentan. El tema sigue automáticamente la preferencia clara u oscura del sistema.
+Se conservan victorias, derrotas y rachas en localStorage, sin servidores ni cuentas; puedes borrar las estadísticas desde el juego. Las partidas abandonadas no cuentan. El historial conserva las últimas 50 partidas terminadas y se borra junto con las estadísticas. El tema sigue automáticamente la preferencia clara u oscura del sistema.
 
 ## Rendimiento y disponibilidad
 
@@ -13,7 +13,7 @@ La interfaz se carga independientemente del diccionario completo: Angular lo des
 
 ## Sin Docker
 
-Requisitos: Node.js 20 y npm (compatibilidad del Angular 17 existente; Node 20 y Angular 17 están fuera de soporte y requieren una migración posterior para producción mantenida).
+Requisitos: Node.js 24 LTS y npm, con Angular 20 LTS.
 
 ```sh
 npm ci
@@ -73,4 +73,14 @@ GitHub Actions ejecuta compilación y pruebas unitarias en Linux, Windows y macO
 
 Las pruebas de navegador de CI cubren Chromium, Firefox y WebKit, tanto en el alojamiento estático nativo como en Docker. Para ejecutarlas localmente, instala los tres navegadores con `python -m playwright install chromium firefox webkit` y configura la variable de entorno BROWSERS=chromium,firefox,webkit antes de ejecutar el script.
 
-Dependabot propone actualizaciones semanales de npm, Docker y Actions. El workflow Dependency audit conserva los informes JSON de npm audit y muestra las vulnerabilidades por severidad. Es informativo: una auditoría ejecutada correctamente no significa que no existan vulnerabilidades. Consulta [SECURITY.md](SECURITY.md) antes de desplegar en producción.
+Dependabot propone actualizaciones semanales de npm, Docker y Actions. El workflow Dependency audit conserva los informes JSON de npm audit y muestra las vulnerabilidades por severidad. Los avisos altos y críticos bloquean la comprobación. Los informes incluyen las posibles actualizaciones. Consulta [SECURITY.md](SECURITY.md) antes de desplegar en producción.
+
+## PWA y accesibilidad
+
+La compilación de producción genera un manifiesto instalable, iconos PNG y un service worker versionado. En HTTPS o localhost, tras la primera carga completa, la interfaz y el diccionario quedan disponibles sin conexión. Se conserva la versión activa hasta cerrar las pestañas antiguas para evitar mezclar chunks. El servidor de desarrollo no genera la PWA. La comprobación automática con axe-core comprueba reglas WCAG 2.0/2.1 A y AA en ambos temas; no sustituye una auditoría manual.
+
+## Distribución y seguridad
+
+CodeQL analiza JavaScript/TypeScript y Python. El workflow Container distribution construye y ejecuta las imágenes en runners Linux AMD64 y ARM64 y genera informes JSON de Grype sin exponer el socket Docker al escáner. Una etiqueta semántica vX.Y.Z que apunte a un commit validado de master activa publicación en GHCR y la creación de una release; se exige CI y CodeQL exitosos para el SHA, ausencia de avisos altos/críticos de npm (incluido desarrollo) y de contenedor. Las PR no publican imágenes. Un paquete GHCR nuevo puede requerir habilitar su visibilidad pública en GitHub.
+
+No se publica una release simplemente por abrir una PR.

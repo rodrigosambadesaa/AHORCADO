@@ -2,12 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { cargarDiccionario, palabrasRespaldo } from './dictionary';
+import { Partida, claveHistorial, leerHistorial, registrarPartida } from './game-history';
 import { normalizarLetra } from './game-utils';
 import { Dificultad, Estadisticas, claveEstadisticas, dificultades, opcionesDificultad, elegirPalabra, estadisticasVacias, leerEstadisticas, registrarResultado } from './game-settings';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
@@ -24,6 +24,7 @@ export class AppComponent implements OnInit {
   dificultad: Dificultad = 'clasico';
   dificultadActual: Dificultad = 'clasico';
   estadisticas: Estadisticas = this.cargarEstadisticas();
+  historial: Partida[] = this.cargarHistorial();
   cargando = false;
   diccionarioReducido = false;
   private diccionario?: readonly string[];
@@ -122,6 +123,8 @@ export class AppComponent implements OnInit {
     if (this.juegoTerminado) {
       this.estadisticas = registrarResultado(this.estadisticas, this.juegoGanado);
       this.guardarEstadisticas();
+      this.historial = registrarPartida(this.historial, {palabra: this.palabraOriginal, victoria: this.juegoGanado, fallos: this.fallos, dificultad: this.dificultadActual, fecha: Date.now()});
+      this.guardarHistorial();
     }
   }
 
@@ -147,6 +150,18 @@ export class AppComponent implements OnInit {
   reiniciarEstadisticas(): void {
     this.estadisticas = estadisticasVacias();
     this.guardarEstadisticas();
+    this.historial = [];
+    this.guardarHistorial();
+  }
+
+  private cargarHistorial(): Partida[] {
+    try { return leerHistorial(localStorage.getItem(claveHistorial)); }
+    catch { return []; }
+  }
+
+  private guardarHistorial(): void {
+    try { localStorage.setItem(claveHistorial, JSON.stringify(this.historial)); }
+    catch { /* Storage may be unavailable. */ }
   }
 
   private cargarEstadisticas(): Estadisticas {

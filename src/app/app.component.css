@@ -357,3 +357,11 @@ button:focus-visible, input:focus-visible { outline: 3px solid #28475f; outline-
     .palabra span { border-color: #a6c9e8; }
     button:focus-visible, input:focus-visible, .configuracion select:focus-visible { outline-color: #b6d9f4; }
 }
+
+.teclado button { min-height: 44px; }
+.falladas { opacity: 1; }
+
+.historial { border-top: 1px solid #9b9b8d; margin-top: 1.5rem; padding-top: .8rem; }
+.historial h2 { font-size: 1.25rem; }
+.historial ol { padding-left: 1.5rem; max-height: 22rem; overflow-y: auto; }
+.historial li { margin: .5rem 0; overflow-wrap: anywhere; }

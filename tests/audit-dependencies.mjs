@@ -4,6 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { mkdirSync, writeFileSync, appendFileSync } from 'node:fs';
 
 mkdirSync('audit-reports', { recursive: true });
+let severe = false;
 for (const [name, extra] of [['all', []], ['production', ['--omit=dev']]]) {
   const result = spawnSync('npm', ['audit', '--json', '--package-lock-only', ...extra], {
     encoding: 'utf8', maxBuffer: 32 * 1024 * 1024, timeout: 180_000
@@ -20,6 +21,13 @@ for (const [name, extra] of [['all', []], ['production', ['--omit=dev']]]) {
   console.log(summary);
   if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary + '\n');
   if (counts.critical || counts.high) {
-    console.log(`::warning::${name} dependencies contain high or critical advisories; review the artifact before release.`);
+    severe = true;
+    for (const [name, v] of Object.entries(report.vulnerabilities ?? {})) {
+      if (['high', 'critical'].includes(v.severity)) {
+        console.log(JSON.stringify({package: name, severity: v.severity, range: v.range, fix: v.fixAvailable, via: v.via.map(x => typeof x === 'string' ? x : {source: x.source, url: x.url, range: x.range})}));
+      }
+    }
   }
 }
+
+if (severe) process.exitCode = 1;

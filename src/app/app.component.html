@@ -21,10 +21,10 @@
                 {{ cargando ? 'Cargando' : juegoGanado ? 'Ganaste' : juegoPerdido ? 'Perdiste' : 'En juego' }}
             </div>
             <div class="estado-pill">Fallos: {{ fallos }}/{{ maxFallos }}</div>
-            <div class="estado-pill">Progreso: {{ progreso }}%</div>
+            <div class="estado-pill" role="progressbar" aria-label="Progreso de la partida" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="progreso">Progreso: {{ progreso }}%</div>
         </div>
 
-        <section class="ahorcado-box" aria-label="dibujo del ahorcado">
+        <section class="ahorcado-box" role="img" [attr.aria-label]="'Dibujo del ahorcado: ' + fallos + ' de ' + maxFallos + ' fallos'">
             <div class="poste"></div>
             <div class="viga"></div>
             <div class="base"></div>
@@ -38,7 +38,7 @@
             <div class="pie-derecho" *ngIf="parteVisible(6)"></div>
         </section>
 
-        <section class="palabra" [attr.aria-busy]="cargando" [attr.aria-label]="'Palabra: ' + palabraOculta.join(' ')">
+        <section class="palabra" role="group" [attr.aria-busy]="cargando" [attr.aria-label]="'Palabra: ' + palabraOculta.join(' ')">
             <span *ngFor="let letra of palabraOculta">{{ letra }}</span>
         </section>
 
@@ -54,7 +54,7 @@
 
         <p *ngIf="diccionarioReducido">Diccionario reducido: no se pudo descargar el completo. Puedes seguir jugando o recargar la página para reintentarlo.</p>
 
-        <section class="teclado" aria-label="teclado en pantalla">
+        <section class="teclado" role="group" aria-label="teclado en pantalla">
             <button type="button" *ngFor="let letra of letrasTeclado" (click)="probarDesdeTeclado(letra)"
                 [disabled]="cargando || !palabraOriginal || letraUsada(letra) || juegoTerminado"
                 [class.acierto]="letrasAdivinadas.has(letra.toLowerCase())"
@@ -78,6 +78,19 @@
                 <div><dt>Mejor racha</dt><dd>{{ estadisticas.mejorRacha }}</dd></div>
             </dl>
             <button type="button" class="secundario" (click)="reiniciarEstadisticas()">Reiniciar estadísticas</button>
+        </section>
+        <section class="historial" aria-labelledby="titulo-historial">
+            <h2 id="titulo-historial">Últimas partidas</h2>
+            <p>Hasta 50 partidas finalizadas, guardadas localmente. Reiniciar estadísticas también borra este historial.</p>
+            <p *ngIf="historial.length === 0">Todavía no hay partidas en el historial.</p>
+            <ol *ngIf="historial.length > 0">
+                <li *ngFor="let partida of historial">
+                    <strong>{{ partida.palabra | uppercase }}</strong>
+                    — {{ partida.victoria ? 'Victoria' : 'Derrota' }}, {{ partida.fallos }}/7 fallos
+                    — {{ dificultades[partida.dificultad].etiqueta }}
+                    — <time [attr.datetime]="partida.fecha | date:'yyyy-MM-ddTHH:mm:ssZZZZZ'">{{ partida.fecha | date:'dd/MM/yyyy HH:mm' }}</time>
+                </li>
+            </ol>
         </section>
     </section>
 </main>
