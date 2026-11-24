@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import spanishWords from 'an-array-of-spanish-words';
+import { esPalabraJugable, normalizarLetra } from './game-utils';
 
 @Component({
   selector: 'app-root',
@@ -16,7 +17,6 @@ export class AppComponent {
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
     'N', 'Ñ', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
   ];
-  readonly partes = ['cuerda', 'cabeza', 'tronco', 'brazo-izquierdo', 'brazo-derecho', 'pie-izquierdo', 'pie-derecho'];
 
   intento = '';
   mensaje = 'Pulsa nueva partida para empezar.';
@@ -24,7 +24,6 @@ export class AppComponent {
   palabraNormalizada: string[] = [];
   letrasAdivinadas = new Set<string>();
   letrasFalladas = new Set<string>();
-  juegoIniciado = false;
 
   constructor() {
     this.nuevaPartida();
@@ -32,7 +31,7 @@ export class AppComponent {
 
   get palabraOculta(): string[] {
     return this.palabraNormalizada.map((letra, indice) => {
-      return this.letrasAdivinadas.has(letra) ? this.palabraOriginal[indice].toUpperCase() : '_';
+      return this.letrasAdivinadas.has(letra) || this.juegoPerdido ? this.palabraOriginal[indice].toUpperCase() : '_';
     });
   }
 
@@ -45,11 +44,12 @@ export class AppComponent {
   }
 
   get progreso(): number {
-    return Math.round((this.letrasAdivinadas.size / new Set(this.palabraNormalizada).size) * 100);
+    const total = this.palabraNormalizada.length;
+    return total === 0 ? 0 : Math.round(100 * this.palabraNormalizada.filter(l => this.letrasAdivinadas.has(l)).length / total);
   }
 
   get juegoGanado(): boolean {
-    return this.palabraNormalizada.every((l) => this.letrasAdivinadas.has(l));
+    return this.palabraNormalizada.length > 0 && this.palabraNormalizada.every((l) => this.letrasAdivinadas.has(l));
   }
 
   get juegoPerdido(): boolean {
@@ -62,16 +62,15 @@ export class AppComponent {
 
   nuevaPartida(): void {
     this.palabraOriginal = this.obtenerPalabraValida();
-    this.palabraNormalizada = [...this.palabraOriginal].map((letra) => this.normalizarLetra(letra));
+    this.palabraNormalizada = [...this.palabraOriginal].map((letra) => normalizarLetra(letra));
     this.letrasAdivinadas.clear();
     this.letrasFalladas.clear();
     this.intento = '';
-    this.juegoIniciado = true;
     this.mensaje = 'Juego iniciado. Escribe una letra y pulsa probar.';
   }
 
   probarIntento(): void {
-    const letra = this.normalizarLetra(this.intento);
+    const letra = normalizarLetra(this.intento);
     this.intento = '';
 
     if (this.juegoTerminado) {
@@ -79,7 +78,7 @@ export class AppComponent {
     }
 
     if (!/^[a-zñ]$/i.test(letra)) {
-      this.mensaje = 'Introduce solo una letra valida.';
+      this.mensaje = 'Introduce solo una letra válida.';
       return;
     }
 
@@ -90,7 +89,7 @@ export class AppComponent {
 
     if (this.palabraNormalizada.includes(letra)) {
       this.letrasAdivinadas.add(letra);
-      this.mensaje = `Bien: ${letra.toUpperCase()} esta en la palabra.`;
+      this.mensaje = `Bien: ${letra.toUpperCase()} está en la palabra.`;
     } else {
       this.letrasFalladas.add(letra);
       this.mensaje = `No aparece ${letra.toUpperCase()}.`;
@@ -111,7 +110,7 @@ export class AppComponent {
   }
 
   letraUsada(letra: string): boolean {
-    const normalizada = letra.toLowerCase();
+    const normalizada = normalizarLetra(letra);
     return this.letrasAdivinadas.has(normalizada) || this.letrasFalladas.has(normalizada);
   }
 
@@ -126,9 +125,9 @@ export class AppComponent {
     while (intentos < 8000) {
       intentos += 1;
       candidata = spanishWords[Math.floor(Math.random() * spanishWords.length)] ?? '';
-      candidata = candidata.trim().toLowerCase();
+      candidata = candidata.trim().normalize('NFC').toLowerCase();
 
-      if (this.esPalabraJugable(candidata)) {
+      if (esPalabraJugable(candidata)) {
         return candidata;
       }
     }
@@ -136,19 +135,4 @@ export class AppComponent {
     return 'ahorcado';
   }
 
-  private esPalabraJugable(valor: string): boolean {
-    if (valor.length < 4 || valor.length > 14) {
-      return false;
-    }
-
-    return /^[a-záéíóúüñ]+$/i.test(valor);
-  }
-
-  private normalizarLetra(letra: string): string {
-    return letra
-      .normalize('NFD')
-      .replace(/\p{Diacritic}/gu, '')
-      .replace(/ü/gi, 'u')
-      .toLowerCase();
-  }
 }

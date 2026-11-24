@@ -2,10 +2,9 @@
     <section class="panel">
         <header class="encabezado">
             <p class="etiqueta">Ahorcado Angular</p>
-            <h1>Diccionario completo en espanol</h1>
+            <h1>Ahorcado en español</h1>
             <p class="subtitulo">
-                Partida basada en an-array-of-spanish-words (~636k palabras). Acentos y tildes se validan de forma
-                inteligente.
+                Adivina la palabra antes de cometer siete fallos. Las vocales con tilde equivalen a las vocales sin tilde; la ñ es una letra distinta.
             </p>
         </header>
 
@@ -31,24 +30,25 @@
             <div class="pie-derecho" *ngIf="parteVisible(6)"></div>
         </section>
 
-        <section class="palabra" aria-label="palabra oculta">
+        <section class="palabra" [attr.aria-label]="'Palabra: ' + palabraOculta.join(' ')">
             <span *ngFor="let letra of palabraOculta">{{ letra }}</span>
         </section>
 
         <form class="controles" (ngSubmit)="probarIntento()">
             <label for="intento">Tu letra</label>
-            <input id="intento" name="intento" [(ngModel)]="intento" maxlength="1" autocomplete="off"
+            <input id="intento" name="intento" [(ngModel)]="intento" maxlength="2" autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="mensaje"
                 [disabled]="juegoTerminado" />
             <button type="submit" [disabled]="juegoTerminado">Probar</button>
             <button type="button" class="secundario" (click)="nuevaPartida()">Nueva partida</button>
         </form>
 
-        <p class="mensaje">{{ mensaje }}</p>
+        <p class="mensaje" id="mensaje" role="status" aria-live="polite" aria-atomic="true">{{ mensaje }}</p>
 
         <section class="teclado" aria-label="teclado en pantalla">
             <button type="button" *ngFor="let letra of letrasTeclado" (click)="probarDesdeTeclado(letra)"
                 [disabled]="letraUsada(letra) || juegoTerminado"
                 [class.acierto]="letrasAdivinadas.has(letra.toLowerCase())"
+                [attr.aria-label]="letra + (letrasAdivinadas.has(letra.toLowerCase()) ? ', acertada' : letrasFalladas.has(letra.toLowerCase()) ? ', fallada' : '')"
                 [class.error]="letrasFalladas.has(letra.toLowerCase())">
                 {{ letra }}
             </button>

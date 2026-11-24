@@ -320,3 +320,14 @@ button:disabled {
         left: 138px;
     }
 }
+
+button:not(:disabled) { cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 3px solid #28475f; outline-offset: 3px; }
+.teclado button.acierto, .teclado button.error { opacity: 1; }
+.teclado button.acierto { background: #176b49; }
+.teclado button.error { background: #8e3026; }
+.secundario { background: #a64216; }
+@media (prefers-reduced-motion: reduce) {
+    .panel { animation: none; }
+    button { transition: none; }
+}
