@@ -13,7 +13,7 @@ La interfaz se carga independientemente del diccionario completo: Angular lo des
 
 ## Sin Docker
 
-Requisitos: Node.js 20 y npm (compatibilidad del Angular 17 existente; Node 20 y Angular 17 están fuera de soporte y requieren una migración posterior para producción mantenida).
+Requisitos: Node.js 24 LTS y npm, con Angular 20 LTS.
 
 ```sh
 npm ci

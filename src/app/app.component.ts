@@ -6,11 +6,10 @@ import { normalizarLetra } from './game-utils';
 import { Dificultad, Estadisticas, claveEstadisticas, dificultades, opcionesDificultad, elegirPalabra, estadisticasVacias, leerEstadisticas, registrarResultado } from './game-settings';
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+    selector: 'app-root',
+    imports: [CommonModule, FormsModule],
+    templateUrl: './app.component.html',
+    styleUrl: './app.component.css'
 })
 export class AppComponent implements OnInit {
   readonly maxFallos = 7;
