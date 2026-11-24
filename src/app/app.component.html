@@ -79,5 +79,18 @@
             </dl>
             <button type="button" class="secundario" (click)="reiniciarEstadisticas()">Reiniciar estadísticas</button>
         </section>
+        <section class="historial" aria-labelledby="titulo-historial">
+            <h2 id="titulo-historial">Últimas partidas</h2>
+            <p>Hasta 50 partidas finalizadas, guardadas localmente. Reiniciar estadísticas también borra este historial.</p>
+            <p *ngIf="historial.length === 0">Todavía no hay partidas en el historial.</p>
+            <ol *ngIf="historial.length > 0">
+                <li *ngFor="let partida of historial">
+                    <strong>{{ partida.palabra | uppercase }}</strong>
+                    — {{ partida.victoria ? 'Victoria' : 'Derrota' }}, {{ partida.fallos }}/7 fallos
+                    — {{ dificultades[partida.dificultad].etiqueta }}
+                    — <time [attr.datetime]="partida.fecha | date:'yyyy-MM-ddTHH:mm:ssZZZZZ'">{{ partida.fecha | date:'dd/MM/yyyy HH:mm' }}</time>
+                </li>
+            </ol>
+        </section>
     </section>
 </main>

@@ -1,17 +1,19 @@
 import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
+import { claveHistorial } from './game-history';
 import { claveEstadisticas } from './game-settings';
 
 describe('Ahorcado', () => {
   let juego: AppComponent;
   beforeEach(async () => {
     localStorage.removeItem(claveEstadisticas);
+    localStorage.removeItem(claveHistorial);
     juego = new AppComponent();
     spyOn<any>(juego, 'obtenerPalabraValida').and.resolveTo('cañón');
     await juego.nuevaPartida();
   });
 
-  afterEach(() => localStorage.removeItem(claveEstadisticas));
+  afterEach(() => { localStorage.removeItem(claveEstadisticas); localStorage.removeItem(claveHistorial); });
 
   it('inicia con la palabra oculta y sin fallos', () => {
     expect(juego.palabraOculta).toEqual(['_', '_', '_', '_', '_']);
@@ -70,6 +72,8 @@ describe('Ahorcado', () => {
     for (const letra of ['c','a','ñ','o','n','z']) juego.probarDesdeTeclado(letra);
     expect(juego.estadisticas.ganadas).toBe(1);
     expect(new AppComponent().estadisticas.ganadas).toBe(1);
+    expect(new AppComponent().historial.length).toBe(1);
+    expect(juego.historial[0].palabra).toBe('cañón');
     await juego.nuevaPartida();
     expect(juego.estadisticas.ganadas).toBe(1);
     for (const letra of ['b','d','e','f','g','h','i']) juego.probarDesdeTeclado(letra);
@@ -79,6 +83,7 @@ describe('Ahorcado', () => {
     expect(juego.porcentajeVictorias).toBe(50);
     juego.reiniciarEstadisticas();
     expect(new AppComponent().estadisticas.ganadas).toBe(0);
+    expect(new AppComponent().historial).toEqual([]);
   });
 
   it('aplica la dificultad únicamente a una nueva partida', async () => {

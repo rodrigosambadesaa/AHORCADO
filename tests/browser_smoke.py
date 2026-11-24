@@ -38,9 +38,11 @@ with sync_playwright() as playwright:
             expect(page.locator(".palabra")).not_to_contain_text("_")
             total = sum(int(page.locator('[data-stat="' + stat + '"]').inner_text()) for stat in ("ganadas", "perdidas"))
             assert total == 1
+            expect(page.locator('.historial li')).to_have_count(1)
             page.reload(wait_until="networkidle")
             expect(page.get_by_role("status")).to_contain_text("Juego iniciado", timeout=30000)
             assert sum(int(page.locator('[data-stat="' + stat + '"]').inner_text()) for stat in ("ganadas", "perdidas")) == 1
+            expect(page.locator('.historial li')).to_have_count(1)
             page.locator("#dificultad").select_option(label="Palabras largas (11–14)")
             page.get_by_role("button", name="Nueva partida").click()
             expect(page.get_by_role("status")).to_contain_text("Juego iniciado")
@@ -48,6 +50,7 @@ with sync_playwright() as playwright:
             page.get_by_role("button", name="Reiniciar estadísticas").click()
             expect(page.locator('[data-stat="ganadas"]')).to_have_text("0")
             expect(page.locator('[data-stat="perdidas"]')).to_have_text("0")
+            expect(page.locator(".historial li")).to_have_count(0)
             page.emulate_media(color_scheme="dark")
             assert page.locator("app-root").evaluate("(element) => getComputedStyle(element).colorScheme") == "dark"
             expect(page.locator(".estado-fila")).to_contain_text("Fallos: 0/7")
