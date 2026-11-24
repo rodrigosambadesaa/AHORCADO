@@ -33,7 +33,14 @@ jobs:
           docker build --platform linux/${{ matrix.arch }} -t ahorcado:ci .
           test "$(docker image inspect ahorcado:ci --format '{{.Architecture}}')" = "${{ matrix.arch }}"
           docker run -d --name ahorcado-test --read-only --tmpfs /tmp --cap-drop ALL --security-opt no-new-privileges -p 127.0.0.1:18081:8080 ahorcado:ci
-          curl --retry 30 --retry-connrefused --retry-delay 1 -fsS http://127.0.0.1:18081/healthz
+          for attempt in $(seq 1 60); do
+            status="$(docker inspect -f '{{.State.Health.Status}}' ahorcado-test)"
+            if [ "$status" = healthy ]; then break; fi
+            if [ "$status" = unhealthy ] || [ "$(docker inspect -f '{{.State.Running}}' ahorcado-test)" != true ]; then docker logs ahorcado-test; exit 1; fi
+            sleep 1
+          done
+          test "$(docker inspect -f '{{.State.Health.Status}}' ahorcado-test)" = healthy
+          curl --retry 5 --retry-all-errors --retry-delay 1 -fsS http://127.0.0.1:18081/healthz
           python tests/http_smoke.py
           test "$(docker exec ahorcado-test id -u)" != 0
           docker save ahorcado:ci -o "$RUNNER_TEMP/ahorcado.tar"
@@ -67,6 +74,8 @@ jobs:
           name: image-${{ matrix.arch }}
           path: ${{ runner.temp }}/ahorcado.tar
           retention-days: 1
+      - run: docker logs ahorcado-test
+        if: failure()
       - run: docker rm -f ahorcado-test
         if: always()
   release-gate:
