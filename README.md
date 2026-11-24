@@ -68,3 +68,9 @@ BASE_URL permite cambiar la URL de las pruebas (por defecto http://127.0.0.1:180
 Las pruebas HTTP verifican específicamente la configuración de Nginx; las de navegador también funcionan contra la compilación estática sin Docker.
 
 GitHub Actions ejecuta compilación y pruebas unitarias en Linux, Windows y macOS, pruebas de navegador en Linux para ambos modos, y comprobaciones de contenedor, cabeceras y rutas. En un fork puede ser necesario activar Actions en la pestaña correspondiente.
+
+## Mantenimiento y seguridad
+
+Las pruebas de navegador de CI cubren Chromium, Firefox y WebKit, tanto en el alojamiento estático nativo como en Docker. Para ejecutarlas localmente, instala los tres navegadores con `python -m playwright install chromium firefox webkit` y configura la variable de entorno BROWSERS=chromium,firefox,webkit antes de ejecutar el script.
+
+Dependabot propone actualizaciones semanales de npm, Docker y Actions. El workflow Dependency audit conserva los informes JSON de npm audit y muestra las vulnerabilidades por severidad. Es informativo: una auditoría ejecutada correctamente no significa que no existan vulnerabilidades. Consulta [SECURITY.md](SECURITY.md) antes de desplegar en producción.
