@@ -1,13 +1,17 @@
 import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
+import { claveEstadisticas } from './game-settings';
 
 describe('Ahorcado', () => {
   let juego: AppComponent;
   beforeEach(() => {
+    localStorage.removeItem(claveEstadisticas);
     juego = new AppComponent();
     spyOn<any>(juego, 'obtenerPalabraValida').and.returnValue('cañón');
     juego.nuevaPartida();
   });
+
+  afterEach(() => localStorage.removeItem(claveEstadisticas));
 
   it('inicia con la palabra oculta y sin fallos', () => {
     expect(juego.palabraOculta).toEqual(['_', '_', '_', '_', '_']);
@@ -60,6 +64,28 @@ describe('Ahorcado', () => {
     juego.probarDesdeTeclado('a');
     expect(juego.progreso).toBe(50);
     expect(juego.palabraOculta).toEqual(['_', 'A', '_', 'A']);
+  });
+
+  it('registra la victoria una sola vez, persiste y permite reiniciar estadísticas', () => {
+    for (const letra of ['c','a','ñ','o','n','z']) juego.probarDesdeTeclado(letra);
+    expect(juego.estadisticas.ganadas).toBe(1);
+    expect(new AppComponent().estadisticas.ganadas).toBe(1);
+    juego.nuevaPartida();
+    expect(juego.estadisticas.ganadas).toBe(1);
+    for (const letra of ['b','d','e','f','g','h','i']) juego.probarDesdeTeclado(letra);
+    expect(juego.estadisticas.perdidas).toBe(1);
+    expect(juego.estadisticas.racha).toBe(0);
+    expect(juego.estadisticas.mejorRacha).toBe(1);
+    expect(juego.porcentajeVictorias).toBe(50);
+    juego.reiniciarEstadisticas();
+    expect(new AppComponent().estadisticas.ganadas).toBe(0);
+  });
+
+  it('aplica la dificultad únicamente a una nueva partida', () => {
+    juego.dificultad = 'largo';
+    expect(juego.dificultadActual).toBe('clasico');
+    juego.nuevaPartida();
+    expect(juego.dificultadActual).toBe('largo');
   });
 
   it('usa una palabra de respaldo si no encuentra una válida', () => {

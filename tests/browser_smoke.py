@@ -29,7 +29,18 @@ with sync_playwright() as playwright:
         expect(page.locator(".estado-fila")).not_to_contain_text("En juego")
         expect(page.locator("#intento")).to_be_disabled()
         expect(page.locator(".palabra")).not_to_contain_text("_")
+        total = sum(int(page.locator('[data-stat="' + stat + '"]').inner_text()) for stat in ("ganadas", "perdidas"))
+        assert total == 1
+        page.reload(wait_until="networkidle")
+        assert sum(int(page.locator('[data-stat="' + stat + '"]').inner_text()) for stat in ("ganadas", "perdidas")) == 1
+        page.locator("#dificultad").select_option(label="Palabras largas (11–14)")
         page.get_by_role("button", name="Nueva partida").click()
+        assert 11 <= page.locator(".palabra span").count() <= 14
+        page.get_by_role("button", name="Reiniciar estadísticas").click()
+        expect(page.locator('[data-stat="ganadas"]')).to_have_text("0")
+        expect(page.locator('[data-stat="perdidas"]')).to_have_text("0")
+        page.emulate_media(color_scheme="dark")
+        assert page.locator("app-root").evaluate("(element) => getComputedStyle(element).colorScheme") == "dark"
         expect(page.locator(".estado-fila")).to_contain_text("Fallos: 0/7")
         expect(page.locator(".palabra")).to_contain_text("_")
         expect(keys.nth(13)).to_be_enabled()

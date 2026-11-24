@@ -2,7 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import spanishWords from 'an-array-of-spanish-words';
-import { esPalabraJugable, normalizarLetra } from './game-utils';
+import { normalizarLetra } from './game-utils';
+import { Dificultad, Estadisticas, claveEstadisticas, dificultades, opcionesDificultad, elegirPalabra, estadisticasVacias, leerEstadisticas, registrarResultado } from './game-settings';
 
 @Component({
   selector: 'app-root',
@@ -18,6 +19,11 @@ export class AppComponent {
     'N', 'Ñ', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
   ];
 
+  readonly dificultades = dificultades;
+  readonly opcionesDificultad = opcionesDificultad;
+  dificultad: Dificultad = 'clasico';
+  dificultadActual: Dificultad = 'clasico';
+  estadisticas: Estadisticas = this.cargarEstadisticas();
   intento = '';
   mensaje = 'Pulsa nueva partida para empezar.';
   palabraOriginal = '';
@@ -61,6 +67,7 @@ export class AppComponent {
   }
 
   nuevaPartida(): void {
+    this.dificultadActual = this.dificultad;
     this.palabraOriginal = this.obtenerPalabraValida();
     this.palabraNormalizada = [...this.palabraOriginal].map((letra) => normalizarLetra(letra));
     this.letrasAdivinadas.clear();
@@ -102,6 +109,10 @@ export class AppComponent {
     if (this.juegoPerdido) {
       this.mensaje = `Perdiste. La palabra era ${this.palabraOriginal.toUpperCase()}.`;
     }
+    if (this.juegoTerminado) {
+      this.estadisticas = registrarResultado(this.estadisticas, this.juegoGanado);
+      this.guardarEstadisticas();
+    }
   }
 
   probarDesdeTeclado(letra: string): void {
@@ -118,21 +129,31 @@ export class AppComponent {
     return this.fallos > indice;
   }
 
-  private obtenerPalabraValida(): string {
-    let candidata = '';
-    let intentos = 0;
-
-    while (intentos < 8000) {
-      intentos += 1;
-      candidata = spanishWords[Math.floor(Math.random() * spanishWords.length)] ?? '';
-      candidata = candidata.trim().normalize('NFC').toLowerCase();
-
-      if (esPalabraJugable(candidata)) {
-        return candidata;
-      }
-    }
-
-    return 'ahorcado';
+  get porcentajeVictorias(): number {
+    const total = this.estadisticas.ganadas + this.estadisticas.perdidas;
+    return total ? Math.round(100 * this.estadisticas.ganadas / total) : 0;
   }
 
+  reiniciarEstadisticas(): void {
+    this.estadisticas = estadisticasVacias();
+    this.guardarEstadisticas();
+  }
+
+  private cargarEstadisticas(): Estadisticas {
+    try {
+      return leerEstadisticas(localStorage.getItem(claveEstadisticas));
+    } catch {
+      return estadisticasVacias();
+    }
+  }
+
+  private guardarEstadisticas(): void {
+    try {
+      localStorage.setItem(claveEstadisticas, JSON.stringify(this.estadisticas));
+    } catch { /* The game remains playable without browser storage. */ }
+  }
+
+  private obtenerPalabraValida(): string {
+    return elegirPalabra(spanishWords, this.dificultadActual);
+  }
 }

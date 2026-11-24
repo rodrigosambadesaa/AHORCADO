@@ -8,6 +8,14 @@
             </p>
         </header>
 
+        <div class="configuracion">
+            <label for="dificultad">Longitud de la próxima palabra</label>
+            <select id="dificultad" [(ngModel)]="dificultad">
+                <option *ngFor="let opcion of opcionesDificultad" [ngValue]="opcion">{{ dificultades[opcion].etiqueta }}</option>
+            </select>
+        </div>
+        <p class="modo">Partida actual: {{ dificultades[dificultadActual].etiqueta }}</p>
+
         <div class="estado-fila">
             <div class="estado-pill" [class.ok]="juegoGanado" [class.bad]="juegoPerdido">
                 {{ juegoGanado ? 'Ganaste' : juegoPerdido ? 'Perdiste' : 'En juego' }}
@@ -57,5 +65,17 @@
         <p class="falladas" *ngIf="letrasFalladas.size > 0">
             Falladas: {{ letrasFalladasListado }}
         </p>
+        <section class="estadisticas" aria-labelledby="titulo-estadisticas">
+            <h2 id="titulo-estadisticas">Tus estadísticas</h2>
+            <p>Solo se guardan en este navegador. Las partidas abandonadas no cuentan.</p>
+            <dl>
+                <div><dt>Ganadas</dt><dd data-stat="ganadas">{{ estadisticas.ganadas }}</dd></div>
+                <div><dt>Perdidas</dt><dd data-stat="perdidas">{{ estadisticas.perdidas }}</dd></div>
+                <div><dt>Victorias</dt><dd>{{ porcentajeVictorias }}%</dd></div>
+                <div><dt>Racha</dt><dd>{{ estadisticas.racha }}</dd></div>
+                <div><dt>Mejor racha</dt><dd>{{ estadisticas.mejorRacha }}</dd></div>
+            </dl>
+            <button type="button" class="secundario" (click)="reiniciarEstadisticas()">Reiniciar estadísticas</button>
+        </section>
     </section>
 </main>

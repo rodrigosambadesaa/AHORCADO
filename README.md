@@ -4,6 +4,9 @@ Juego web Angular, derivado del proyecto [webferrol/AHORCADO](https://github.com
 Incluye diccionario español, teclado virtual, siete fallos máximos y reinicio de partida.
 Las vocales acentuadas equivalen a su vocal base; N y Ñ se distinguen. Al perder se muestra la solución.
 
+Puedes elegir palabras cortas (4–6), medias (7–10), largas (11–14) o el modo clásico. La elección se aplica al comenzar una nueva partida. La longitud no garantiza una dificultad lingüística concreta.
+Se conservan victorias, derrotas y rachas en localStorage, sin servidores ni cuentas; puedes borrar las estadísticas desde el juego. Las partidas abandonadas no cuentan. El tema sigue automáticamente la preferencia clara u oscura del sistema.
+
 ## Sin Docker
 
 Requisitos: Node.js 20 y npm (compatibilidad del Angular 17 existente; Node 20 y Angular 17 están fuera de soporte y requieren una migración posterior para producción mantenida).

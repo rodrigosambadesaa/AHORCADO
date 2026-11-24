@@ -331,3 +331,29 @@ button:focus-visible, input:focus-visible { outline: 3px solid #28475f; outline-
     .panel { animation: none; }
     button { transition: none; }
 }
+
+.configuracion { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.configuracion select { max-width: 100%; min-height: 44px; font: inherit; border: 1px solid #4f6379; border-radius: 8px; padding: .4rem; }
+.configuracion select:focus-visible { outline: 3px solid #28475f; outline-offset: 3px; }
+.modo { font-size: .9rem; margin-bottom: 0; }
+.estadisticas { border-top: 1px solid #9b9b8d; margin-top: 1.5rem; padding-top: .8rem; }
+.estadisticas h2 { font-size: 1.25rem; margin: 0; }
+.estadisticas dl { display: flex; flex-wrap: wrap; gap: 1rem; }
+.estadisticas dl div { min-width: 85px; }
+.estadisticas dt { font-size: .85rem; }
+.estadisticas dd { font-size: 1.4rem; font-weight: 700; margin: .2rem 0 0; }
+@media (prefers-color-scheme: dark) {
+    :host { color: #ecedf2; color-scheme: dark; }
+    .escena { background: linear-gradient(145deg, #14202a, #263c39); }
+    .panel { background: #202b36; border-color: #47545f; }
+    .etiqueta { color: #ffb39d; }
+    .subtitulo, .mensaje { color: #d9e0e9; }
+    .estado-pill { background: #354350; }
+    .estado-pill.ok { background: #225c42; }
+    .estado-pill.bad { background: #773c40; }
+    .ahorcado-box { background: #161f29; border-color: #8390a0; }
+    .poste, .viga, .base, .cuerda, .tronco, .brazo-izquierdo, .brazo-derecho, .pie-izquierdo, .pie-derecho { background: #d8e0ea; }
+    .cabeza { border-color: #d8e0ea; }
+    .palabra span { border-color: #a6c9e8; }
+    button:focus-visible, input:focus-visible, .configuracion select:focus-visible { outline-color: #b6d9f4; }
+}
