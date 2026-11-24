@@ -1,6 +1,7 @@
 name: CI
 on:
   push:
+    branches: [master]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -14,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-24.04, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     steps:
@@ -34,6 +35,7 @@ jobs:
           name: coverage-${{ matrix.os }}
           path: coverage/
           if-no-files-found: ignore
+      # Pin Ubuntu 24.04: Playwright 1.51 does not support Ubuntu 26.04.
       - name: Native production browser smoke test
         if: runner.os == 'Linux'
         shell: bash
@@ -47,7 +49,7 @@ jobs:
           python tests/browser_smoke.py
   docker:
     name: Docker production and browser tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
