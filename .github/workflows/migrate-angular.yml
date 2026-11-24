@@ -1,0 +1,73 @@
+name: Prepare Angular migration
+on:
+  push:
+    branches: [improve/angular-modernization]
+    paths: ['.github/workflows/migrate-angular.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  migrate:
+    if: github.ref == 'refs/heads/improve/angular-modernization'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - name: Run official sequential migrations
+        env:
+          NG_CLI_ANALYTICS: 'false'
+          CI: 'true'
+        run: |
+          set -euo pipefail
+          for version in 18 19 20 21; do
+            npx ng update "@angular/core@$version" "@angular/cli@$version" --allow-dirty
+          done
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci
+      - run: npm run test:ci
+      - run: npm run build
+      - name: Export migration patch
+        run: |
+          git add package.json package-lock.json angular.json tsconfig*.json src
+          git diff --cached --binary > "$RUNNER_TEMP/angular-migration.patch"
+          test -s "$RUNNER_TEMP/angular-migration.patch"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: angular-migration-patch
+          path: ${{ runner.temp }}/angular-migration.patch
+          if-no-files-found: error
+  commit:
+    # Trusted maintenance branch only. No PR triggers or npm execution with write credentials.
+    needs: migrate
+    if: github.ref == 'refs/heads/improve/angular-modernization'
+    permissions:
+      contents: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: angular-migration-patch
+          path: ${{ runner.temp }}/migration
+      - name: Apply tested migration to its own branch only
+        run: |
+          set -euo pipefail
+          git apply --index "$RUNNER_TEMP/migration/angular-migration.patch"
+          python - <<'PY'
+          import subprocess
+          paths = subprocess.check_output(['git', 'diff', '--cached', '--name-only', '-z']).decode().split('\0')
+          assert all(p in ('package.json','package-lock.json','angular.json','tsconfig.json','tsconfig.app.json','tsconfig.spec.json') or p.startswith('src/') for p in paths if p), paths
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Run official Angular 18 through 21 migrations and regenerate lockfile"
+          git push origin HEAD:refs/heads/improve/angular-modernization
