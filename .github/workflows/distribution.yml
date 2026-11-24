@@ -44,6 +44,7 @@ jobs:
           python tests/http_smoke.py
           test "$(docker exec ahorcado-test id -u)" != 0
           docker save ahorcado:ci -o "$RUNNER_TEMP/ahorcado.tar"
+          chmod 0644 "$RUNNER_TEMP/ahorcado.tar"
       - name: Scan saved image without Docker socket or credentials
         run: |
           mkdir -p scan

@@ -39,6 +39,7 @@ with sync_playwright() as playwright:
             total = sum(int(page.locator('[data-stat="' + stat + '"]').inner_text()) for stat in ("ganadas", "perdidas"))
             assert total == 1
             page.reload(wait_until="networkidle")
+            expect(page.get_by_role("status")).to_contain_text("Juego iniciado", timeout=30000)
             assert sum(int(page.locator('[data-stat="' + stat + '"]').inner_text()) for stat in ("ganadas", "perdidas")) == 1
             page.locator("#dificultad").select_option(label="Palabras largas (11–14)")
             page.get_by_role("button", name="Nueva partida").click()

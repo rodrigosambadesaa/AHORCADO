@@ -25,7 +25,11 @@ self.addEventListener('fetch', event => {
   const request = event.request;
   if (request.method !== 'GET' || !request.url.startsWith(self.registration.scope)) return;
   if (request.mode === 'navigate') {
-    event.respondWith((async () => (await (await caches.open(CACHE)).match(index)) || fetch(request))());
+    event.respondWith((async () => {
+      const cached = await (await caches.open(CACHE)).match(index);
+      // A synthetic response keeps the navigation URL rather than /index.html.
+      return cached ? new Response(cached.body, {status: cached.status, headers: cached.headers}) : fetch(request);
+    })());
   } else if (urls.has(request.url)) {
     event.respondWith((async () => (await (await caches.open(CACHE)).match(request)) || fetch(request))());
   }
