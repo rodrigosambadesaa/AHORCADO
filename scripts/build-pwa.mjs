@@ -57,13 +57,19 @@ writeFileSync(join(root, 'manifest.webmanifest'), JSON.stringify({
   }))
 }, null, 2));
 
+const indexPath = join(root, 'index.html');
+const html = readFileSync(indexPath, 'utf8');
+if (!html.includes('rel="manifest"')) {
+  writeFileSync(indexPath, html.replace('</head>', '  <meta name="theme-color" content="#0e6e7c">\n  <link rel="manifest" href="manifest.webmanifest">\n  <link rel="apple-touch-icon" href="icon-192.png">\n</head>'));
+}
+
 function list(dir) {
   return readdirSync(dir, { withFileTypes: true }).flatMap(entry => {
     const file = join(dir, entry.name);
     return entry.isDirectory() ? list(file) : [relative(root, file).replaceAll('\\', '/')];
   });
 }
-const assets = list(root).filter(path => !path.endsWith('.map') && path !== 'sw.js' && !path.startsWith('.')).sort();
+const assets = list(root).filter(path => !path.endsWith('.map') && path !== 'sw.js' && !path.split('/').some(part => part.startsWith('.'))).sort();
 const template = readFileSync('scripts/service-worker.js', 'utf8');
 const hash = createHash('sha256').update(template);
 for (const path of assets) hash.update(path).update(readFileSync(join(root, path)));

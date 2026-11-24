@@ -70,6 +70,10 @@ jobs:
       - run: docker rm -f ahorcado-test
         if: always()
   release-gate:
+    permissions:
+      contents: read
+      actions: read
+      security-events: read
     if: github.ref_type == 'tag'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -86,6 +90,13 @@ jobs:
           git merge-base --is-ancestor "$GITHUB_SHA" origin/master
           gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?head_sha=$GITHUB_SHA&status=success" --jq '.workflow_runs | length' | grep -Eq '^[1-9][0-9]*$'
           gh api "repos/$GITHUB_REPOSITORY/actions/workflows/codeql.yml/runs?head_sha=$GITHUB_SHA&status=success" --jq '.workflow_runs | length' | grep -Eq '^[1-9][0-9]*$'
+      - name: Block open high and critical CodeQL findings
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api --paginate "repos/$GITHUB_REPOSITORY/code-scanning/alerts?state=open&per_page=100" --jq '.[] | select(.rule.security_severity_level == "high" or .rule.security_severity_level == "critical") | .number' > findings.txt
+          if [ -s findings.txt ]; then cat findings.txt; exit 1; fi
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
