@@ -4,12 +4,12 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "18081:80"
+      - "${AHORCADO_PORT:-18081}:8080"
     read_only: true
     tmpfs:
-      - /var/cache/nginx
-      - /var/run
       - /tmp
+    cap_drop:
+      - ALL
     security_opt:
       - no-new-privileges:true
     restart: unless-stopped
