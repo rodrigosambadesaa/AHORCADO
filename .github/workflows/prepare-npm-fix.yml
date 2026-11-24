@@ -1,0 +1,84 @@
+name: Prepare safe npm security updates
+on:
+  push:
+    branches: [improve/npm-audit-remediation]
+    paths: ['.github/workflows/prepare-npm-fix.yml']
+permissions:
+  contents: read
+jobs:
+  repair:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .nvmrc
+      - name: Apply compatible lockfile updates only
+        run: |
+          set -euo pipefail
+          npm audit --json --package-lock-only > "$RUNNER_TEMP/before.json" || test "$?" = 1
+          npm audit fix --package-lock-only --ignore-scripts --no-fund --json > "$RUNNER_TEMP/fix.json" || test "$?" = 1
+          npm audit --json --package-lock-only > "$RUNNER_TEMP/after.json" || test "$?" = 1
+          git diff --exit-code -- package.json
+          node --input-type=module <<'JS'
+          import {readFileSync} from 'node:fs';
+          const read = path => JSON.parse(readFileSync(path, 'utf8'));
+          const before = read(process.env.RUNNER_TEMP + '/before.json');
+          const after = read(process.env.RUNNER_TEMP + '/after.json');
+          if (!before.metadata || !after.metadata || before.error || after.error) throw Error('Invalid audit result');
+          console.log('Before', before.metadata.vulnerabilities, 'After', after.metadata.vulnerabilities);
+          for (const [name, v] of Object.entries(after.vulnerabilities || {})) {
+            if (['high','critical'].includes(v.severity)) console.log(JSON.stringify({name, severity:v.severity, fix:v.fixAvailable, via:v.via}));
+          }
+          for (const level of ['critical', 'high']) {
+            if (after.metadata.vulnerabilities[level] > before.metadata.vulnerabilities[level]) throw Error('Regression: ' + level);
+          }
+          const lock = read('package-lock.json');
+          const pkg = read('package.json');
+          for (const key of ['dependencies','devDependencies']) {
+            if (JSON.stringify(lock.packages[''][key]) !== JSON.stringify(pkg[key])) throw Error('Root mismatch');
+          }
+          for (const [path, item] of Object.entries(lock.packages)) {
+            if (path && (!item.resolved?.startsWith('https://registry.npmjs.org/') || !item.integrity?.startsWith('sha512-'))) throw Error('Untrusted package: ' + path);
+          }
+          JS
+      - run: npm ci
+      - run: npm run test:ci
+      - run: npm run build
+      - name: Export tested lockfile patch
+        run: |
+          git diff --binary -- package-lock.json > "$RUNNER_TEMP/npm-fix.patch"
+          if [ ! -s "$RUNNER_TEMP/npm-fix.patch" ]; then echo 'No compatible lockfile changes'; fi
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: npm-fix
+          path: |
+            ${{ runner.temp }}/npm-fix.patch
+            ${{ runner.temp }}/before.json
+            ${{ runner.temp }}/after.json
+  commit:
+    needs: repair
+    if: github.ref == 'refs/heads/improve/npm-audit-remediation'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: npm-fix
+          path: ${{ runner.temp }}/fix
+      - name: Commit only tested lockfile on isolated branch
+        run: |
+          set -euo pipefail
+          patch="$RUNNER_TEMP/fix/npm-fix.patch"
+          if [ ! -s "$patch" ]; then exit 0; fi
+          git apply --index "$patch"
+          test "$(git diff --cached --name-only)" = package-lock.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Apply compatible npm security updates from audited lockfile"
+          git push origin HEAD:refs/heads/improve/npm-audit-remediation
