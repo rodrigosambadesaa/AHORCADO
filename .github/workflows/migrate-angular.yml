@@ -25,7 +25,7 @@ jobs:
           CI: 'true'
         run: |
           set -euo pipefail
-          for version in 18 19 20 21; do
+          for version in 18 19 20; do
             npx ng update "@angular/core@$version" "@angular/cli@$version" --allow-dirty
           done
       - uses: actions/setup-node@v4
@@ -69,5 +69,5 @@ jobs:
           PY
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Run official Angular 18 through 21 migrations and regenerate lockfile"
+          git commit -m "Run official Angular 18 through 20 migrations and regenerate lockfile"
           git push origin HEAD:refs/heads/improve/angular-modernization
